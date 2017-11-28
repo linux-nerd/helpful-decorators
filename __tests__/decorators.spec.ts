@@ -1,4 +1,4 @@
-import { timeout, debounce, throttle, once } from '../src';
+import { timeout, debounce, throttle, once, memoize } from '../src';
 jest.mock('lodash.debounce');
 jest.mock('lodash.throttle');
 import * as throttleFn from 'lodash.throttle';
@@ -88,5 +88,26 @@ describe('Decorators', () => {
       expect(consoleSpy).toBeCalled();
       expect(consoleSpy).toHaveBeenCalledTimes(1);
     });
-  })
+  });
+
+  describe('Memoization', () => {
+    class TestMemoization {
+      @memoize
+      method(n) {
+        return n + 10;
+      }
+    }
+    let obj: TestMemoization;
+    beforeEach(() => {
+      obj = new TestMemoization;
+      // obj.method(4);
+    });
+    it('should calculate the result and when invoked again, should fetch from the cache', () => {
+      spyOn(console, 'log').and.callThrough();
+      obj.method(3);
+      expect(console.log).toHaveBeenCalledWith('Calculating Result');
+      obj.method(3);
+      expect(console.log).toHaveBeenCalledWith('Fetching From Cache');
+    });
+  });
 });
